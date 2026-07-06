@@ -22,6 +22,12 @@ public final class ConnectionManager {
     private static final String DB_POOL_MAX_LIFETIME = "db.pool.maxLifetime";
     private static final String DB_POOL_INITIALIZATION_FAIL_TIMEOUT = "db.pool.initializationFailTimeout";
 
+    private static final int DEFAULT_MINIMUM_IDLE = 2;
+    private static final long DEFAULT_CONNECTION_TIMEOUT = 30000L;
+    private static final long DEFAULT_IDLE_TIMEOUT = 600000L;
+    private static final long DEFAULT_MAX_LIFETIME = 1800000L;
+    private static final long DEFAULT_INITIALIZATION_FAIL_TIMEOUT = 1L;
+
     private static final HikariDataSource DATA_SOURCE = createDataSource();
 
     private ConnectionManager() {
@@ -40,14 +46,14 @@ public final class ConnectionManager {
 
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl(getRequiredProperty(properties, DB_URL));
-        config.setUsername(getProperty(properties, DB_USER));
-        config.setPassword(getProperty(properties, DB_PASSWORD));
-        config.setMaximumPoolSize(getRequiredIntProperty(properties, DB_POOL_MAXIMUM_POOL_SIZE));
-        config.setMinimumIdle(getRequiredIntProperty(properties, DB_POOL_MINIMUM_IDLE));
-        config.setConnectionTimeout(getRequiredLongProperty(properties, DB_POOL_CONNECTION_TIMEOUT));
-        config.setIdleTimeout(getRequiredLongProperty(properties, DB_POOL_IDLE_TIMEOUT));
-        config.setMaxLifetime(getRequiredLongProperty(properties, DB_POOL_MAX_LIFETIME));
-        config.setInitializationFailTimeout(getRequiredLongProperty(properties, DB_POOL_INITIALIZATION_FAIL_TIMEOUT));
+        config.setUsername(getRequiredProperty(properties, DB_USER));
+        config.setPassword(getRequiredProperty(properties, DB_PASSWORD));
+        config.setMaximumPoolSize(getRequiredPositiveIntProperty(properties, DB_POOL_MAXIMUM_POOL_SIZE));
+        config.setMinimumIdle(getNonNegativeIntProperty(properties, DB_POOL_MINIMUM_IDLE, DEFAULT_MINIMUM_IDLE));
+        config.setConnectionTimeout(getPositiveLongProperty(properties, DB_POOL_CONNECTION_TIMEOUT, DEFAULT_CONNECTION_TIMEOUT));
+        config.setIdleTimeout(getPositiveLongProperty(properties, DB_POOL_IDLE_TIMEOUT, DEFAULT_IDLE_TIMEOUT));
+        config.setMaxLifetime(getPositiveLongProperty(properties, DB_POOL_MAX_LIFETIME, DEFAULT_MAX_LIFETIME));
+        config.setInitializationFailTimeout(getLongProperty(properties, DB_POOL_INITIALIZATION_FAIL_TIMEOUT, DEFAULT_INITIALIZATION_FAIL_TIMEOUT));
 
         return new HikariDataSource(config);
     }
@@ -70,36 +76,62 @@ public final class ConnectionManager {
     }
 
     private static String getRequiredProperty(Properties properties, String key) {
-        String value = getProperty(properties, key);
+        String value = getProperty(properties, key, "");
         if (value.isEmpty()) {
             throw new IllegalStateException("Property " + key + " is required");
         }
         return value;
     }
 
-    private static String getProperty(Properties properties, String key) {
-        return properties.getProperty(key, "").trim();
+    private static String getProperty(Properties properties, String key, String defaultValue) {
+        return properties.getProperty(key, defaultValue).trim();
     }
 
-    private static int getRequiredIntProperty(Properties properties, String key) {
+    private static int getRequiredPositiveIntProperty(Properties properties, String key) {
         String value = getRequiredProperty(properties, key);
+        int number = parseIntProperty(key, value);
+
+        if (number <= 0) {
+            throw new IllegalStateException("Property " + key + " must be positive");
+        }
+
+        return number;
+    }
+
+    private static int getNonNegativeIntProperty(Properties properties, String key, int defaultValue) {
+        String value = getProperty(properties, key, String.valueOf(defaultValue));
+        int number = parseIntProperty(key, value);
+
+        if (number < 0) {
+            throw new IllegalStateException("Property " + key + " must not be negative");
+        }
+
+        return number;
+    }
+
+    private static long getPositiveLongProperty(Properties properties, String key, long defaultValue) {
+        long number = getLongProperty(properties, key, defaultValue);
+
+        if (number <= 0) {
+            throw new IllegalStateException("Property " + key + " must be positive");
+        }
+
+        return number;
+    }
+
+    private static long getLongProperty(Properties properties, String key, long defaultValue) {
+        String value = getProperty(properties, key, String.valueOf(defaultValue));
 
         try {
-            int number = Integer.parseInt(value);
-            if (number < 0) {
-                throw new IllegalStateException("Property " + key + " must not be negative");
-            }
-            return number;
+            return Long.parseLong(value);
         } catch (NumberFormatException e) {
             throw new IllegalStateException("Property " + key + " must be a number", e);
         }
     }
 
-    private static long getRequiredLongProperty(Properties properties, String key) {
-        String value = getRequiredProperty(properties, key);
-
+    private static int parseIntProperty(String key, String value) {
         try {
-            return Long.parseLong(value);
+            return Integer.parseInt(value);
         } catch (NumberFormatException e) {
             throw new IllegalStateException("Property " + key + " must be a number", e);
         }

@@ -1,9 +1,4 @@
-db.url=
-db.user=
-db.password=
-db.pool.maximumPoolSize=
-db.pool.minimumIdle=
-db.pool.connectionTimeout=
-db.pool.idleTimeout=
-db.pool.maxLifetime=
-db.pool.initializationFailTimeout=
+db.url=jdbc:postgresql://localhost:5432/postgres
+db.user=postgres
+db.password=your_password
+db.pool.maximumPoolSize=10
