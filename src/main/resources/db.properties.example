@@ -1,0 +1,9 @@
+db.url=
+db.user=
+db.password=
+db.pool.maximumPoolSize=
+db.pool.minimumIdle=
+db.pool.connectionTimeout=
+db.pool.idleTimeout=
+db.pool.maxLifetime=
+db.pool.initializationFailTimeout=
