@@ -28,6 +28,7 @@ public final class ConnectionManager {
 
     private static HikariDataSource createDataSource() {
         HikariConfig config = new HikariConfig();
+        config.setDriverClassName("org.postgresql.Driver");
         config.setJdbcUrl(ApplicationProperties.loadProperties(DB_URL));
         config.setUsername(ApplicationProperties.loadProperties(DB_USER));
         config.setPassword(ApplicationProperties.loadProperties(DB_PASSWORD));
