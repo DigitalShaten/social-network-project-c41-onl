@@ -9,8 +9,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class UserPhoto {
     private long id;
-    private Boolean current;
-    private Long fileId;
-    private Long userId;
+    private boolean current;
+    private long fileId;
+    private long userId;
     private LocalDateTime createdDate;
 }

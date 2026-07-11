@@ -8,8 +8,8 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 public class PostPhoto {
-    private Long id;
-    private Long fileId;
-    private Long postId;
+    private long id;
+    private long fileId;
+    private long postId;
     private LocalDateTime createdDate;
 }
