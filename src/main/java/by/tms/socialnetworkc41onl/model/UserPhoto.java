@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 public class UserPhoto {
+    private long id;
     private Boolean current;
     private Long fileId;
     private Long userId;
