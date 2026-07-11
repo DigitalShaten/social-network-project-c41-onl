@@ -1,4 +1,4 @@
-package util;
+package by.tms.socialnetworkc41onl.util;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;

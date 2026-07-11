@@ -6,9 +6,10 @@ import java.time.LocalDateTime;
 
 @Data
 public class Post {
-    long id;
-    String postText;
-    long userId;
-    LocalDateTime createdTime;
+
+    private long id;
+    private String postText;
+    private long userId;
+    private LocalDateTime createdTime;
 
 }

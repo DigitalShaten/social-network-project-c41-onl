@@ -47,7 +47,7 @@ try (Connection connection = ConnectionManager.getConnection()) {
 За чтение `application.properties` отвечает класс:
 
 ```text
-src/main/java/util/ApplicationProperties.java
+src/main/java//by/tms/socialnetworkc41onl/util/ApplicationProperties.java
 ```
 
 Он загружает файл один раз и позволяет получать значения по ключу:

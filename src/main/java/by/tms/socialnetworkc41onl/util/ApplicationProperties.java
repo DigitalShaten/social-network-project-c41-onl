@@ -1,4 +1,4 @@
-package util;
+package by.tms.socialnetworkc41onl.util;
 
 import java.io.IOException;
 import java.io.InputStream;

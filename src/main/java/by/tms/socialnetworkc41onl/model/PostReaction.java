@@ -6,9 +6,11 @@ import java.time.LocalDateTime;
 
 @Data
 public class PostReaction {
-    long id;
-    ReactionType reactionType;
-    long userId;
-    long postId;
-    LocalDateTime createdDate;
+
+    private long id;
+    private ReactionType reactionType;
+    private long userId;
+    private long postId;
+    private LocalDateTime createdDate;
+
 }
