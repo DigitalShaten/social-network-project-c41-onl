@@ -19,13 +19,8 @@ public class PasswordUtil {
      */
     public static String verify(String password, String hashed) {
         try {
-            boolean isCorrect = BCrypt.checkpw(password, hashed);
-            if (isCorrect) {
-                return "OK";
-            } else {
-                return "Неверный пароль / Incorrect password";
-            }
-        } catch (IllegalArgumentException | NullPointerException e) {
+            return BCrypt.checkpw(password, hashed) ? "OK" : "Неверный пароль / Incorrect password";
+        } catch (RuntimeException e) {
             return "Неверный пароль / Incorrect password";
         }
     }
