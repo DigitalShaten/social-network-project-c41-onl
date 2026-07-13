@@ -1,4 +1,4 @@
-package util;
+package by.tms.socialnetworkc41onl.util;
 
 import org.mindrot.jbcrypt.BCrypt;
 

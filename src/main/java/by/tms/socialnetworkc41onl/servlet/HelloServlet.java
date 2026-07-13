@@ -1,4 +1,4 @@
-package by.tms.socialnetworkc41onl;
+package by.tms.socialnetworkc41onl.servlet;
 
 import java.io.*;
 
