@@ -6,8 +6,8 @@ import java.time.LocalDateTime;
 @Data
 
 public class Subscription {
-    long id;
-    long userId;
-    long subscriptionUserId;
-    LocalDateTime createdDate;
+    private long id;
+    private long userId;
+    private long subscriptionUserId;
+    private LocalDateTime createdDate;
 }
