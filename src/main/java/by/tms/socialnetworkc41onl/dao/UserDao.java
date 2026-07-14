@@ -1,7 +1,7 @@
 package by.tms.socialnetworkc41onl.dao;
 
-import util.ConnectionManager;
 import by.tms.socialnetworkc41onl.model.User;
+import by.tms.socialnetworkc41onl.util.ConnectionManager;
 
 import java.sql.*;
 import java.time.LocalDate;
