@@ -42,7 +42,13 @@ public class PostReactionDao {
         try (Connection connection = ConnectionManager.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_REACTION_TYPE_SQL_QUERY)) {
 
-            preparedStatement.setString(1, postReaction.getReactionType().name());
+            ReactionType currentType = postReaction.getReactionType();
+
+            //Замена LIKE -> DISLIKE или DISLIKE -> LIKE
+            ReactionType newType = (currentType.equals(ReactionType.LIKE))
+                    ? ReactionType.DISLIKE
+                    : ReactionType.LIKE;
+            preparedStatement.setString(1, newType.name());
             preparedStatement.setLong(2, postReaction.getId());
             preparedStatement.executeUpdate();
 
