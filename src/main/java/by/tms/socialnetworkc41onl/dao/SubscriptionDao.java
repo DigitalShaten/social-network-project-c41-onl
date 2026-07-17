@@ -6,14 +6,9 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SubscriptionDao {
+import static by.tms.socialnetworkc41onl.util.ConnectionManager.getConnection;
 
-    private Connection getConnection() throws SQLException {
-        String url = "jdbc:postgresql://localhost:5432/postgres";
-        String user = "postgres";
-        String password = "your_password";
-        return DriverManager.getConnection(url, user, password);
-    }
+public class SubscriptionDao {
 
     public void save(Subscription s) {
         String sql = "INSERT INTO subscriptions (user_id, subscription_user_id) VALUES (?, ?)";
