@@ -6,6 +6,8 @@ import by.tms.socialnetworkc41onl.util.ConnectionManager;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class UserDao {
@@ -144,5 +146,41 @@ public class UserDao {
         }
     }
 
+    public List<User> search(String query) {
+        String sqlQuery = "SELECT * FROM users WHERE user_name ILIKE ? OR first_name ILIKE ? OR last_name ILIKE ? ORDER BY user_name";
+        String pattern = "%" + (query == null ? "" : query.trim()) + "%";
+        try (Connection connection = ConnectionManager.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
+
+            preparedStatement.setString(1, pattern);
+            preparedStatement.setString(2, pattern);
+            preparedStatement.setString(3, pattern);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                List<User> users = new ArrayList<>();
+                while (resultSet.next()) {
+                    users.add(map(resultSet));
+                }
+                return users;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Ошибка при поиске пользователей.", e);
+        }
+    }
+
+    private User map(ResultSet resultSet) throws SQLException {
+        User user = new User();
+        user.setId(resultSet.getLong("id"));
+        user.setUserName(resultSet.getString("user_name"));
+        user.setEmail(resultSet.getString("email"));
+        user.setPasswordHash(resultSet.getString("password_hash"));
+        user.setStatus(resultSet.getBoolean("status"));
+        user.setFirstName(resultSet.getString("first_name"));
+        user.setLastName(resultSet.getString("last_name"));
+        user.setBirthday(resultSet.getObject("birthday", LocalDate.class));
+        user.setGender(resultSet.getString("gender"));
+        user.setAbout(resultSet.getString("about"));
+        user.setCreatedDate(resultSet.getObject("created_date", LocalDateTime.class));
+        return user;
+    }
 }
 
