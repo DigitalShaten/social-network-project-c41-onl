@@ -57,7 +57,7 @@ public class UserPhotoDao {
     userPhoto.setUserId(resultSet.getLong("USER_ID"));
     userPhoto.setId(resultSet.getLong("ID"));
     userPhoto.setCurrent(resultSet.getBoolean("CURRENT"));
-    return Optional.of(resultSet.getLong("FILE_ID"));
+    return Optional.of(resultSet.getLong("USER_ID"));
    }
   } catch (RuntimeException e) {
    throw new RuntimeException(e);
