@@ -18,7 +18,7 @@ public final class ConnectionManager {
     private ConnectionManager() {
     }
 
-    public static Connection getConnection() throws SQLException {
+    public static Connection getConnection(String s, String postgres, String admin) throws SQLException {
         try {
             return DATA_SOURCE.getConnection();
         } catch (SQLException e) {

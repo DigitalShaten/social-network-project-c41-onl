@@ -1,23 +1,22 @@
 package by.tms.socialnetworkc41onl.dao;
-import by.tms.socialnetworkc41onl.model.User;
 import by.tms.socialnetworkc41onl.model.UserPhoto;
-import lombok.Data;
+import by.tms.socialnetworkc41onl.util.ConnectionManager;
+
 
 import java.sql.*;
 import java.util.Optional;
 
-@Data
+
 public class UserPhotoDao {
 
-
  public void save(Connection connection, UserPhoto photo) throws SQLException {
-  Connection con = DriverManager.getConnection("jdbc:postgresql://localhost:5432/postgres", "postgres", "admin");
-  try {
-   PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO user_photos(file_id, current) VALUES (?, ?)");
-   connection.setAutoCommit(false);
+  String sql = "INSERT INTO user_photos(file_id, current,user_id) VALUES (?, ?, ?)";
+  try (Connection con = ConnectionManager.getConnection("jdbc:postgresql://localhost:5432/postgres", "postgres", "admin");
+       PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
    preparedStatement.setLong(1, photo.getFileId());
+   preparedStatement.setLong(2, photo.getUserId());
+   preparedStatement.setBoolean(3, photo.isCurrent());
    int rows = preparedStatement.executeUpdate();
-
    if (rows != 1) {
     throw new SQLException("Ожидалась 1 строка, а затронуто: " + rows);
    }
@@ -25,40 +24,42 @@ public class UserPhotoDao {
    throw new RuntimeException(e);
   }
  }
-public void unsetCurrentForUser(Connection con, long userId)throws SQLException{
- Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/postgres", "postgres", "admin");
 
- try {
-  PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO user_photos(file_id, current) VALUES (?, ?)");
-  preparedStatement.setLong(1, userId);
-  int rowsUpdated = preparedStatement.executeUpdate();
-  if (rowsUpdated > 0) {
-   System.out.println("Снято current с " + rowsUpdated + " фото пользователя " + userId);
-  }
- }  catch (SQLException e) {
-  throw new RuntimeException(e);
- }
-}
-public Optional<UserPhoto>finduserid(Connection connectionlong, long userId)throws SQLException{
- Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/postgres", "postgres", "admin");
- try {
-  PreparedStatement preparedStatement = connection.prepareStatement("SELECT id, user_id, * FROM user_photos WHERE file_id= ?");
-  preparedStatement.setLong(1, userId);
-  ResultSet resultSet = preparedStatement.executeQuery();
-  if (resultSet.next()) {
-   UserPhoto userPhoto = new UserPhoto();
-   userPhoto.setUserId(resultSet.getLong("id"));
-   userPhoto.setId(resultSet.getLong("id"));
+ public void unsetCurrentForUser(Connection con, long USER_ID) throws SQLException {
 
-   return Optional.of(new UserPhoto());
-  } else {
-   return Optional.empty();
-  }
- }catch (SQLException e) {
+
+  try (Connection connection = ConnectionManager.getConnection("jdbc:postgresql://localhost:5432/postgres", "postgres", "admin");
+       PreparedStatement preparedStatement = connection.prepareStatement("UPDATE USER_PHOTOS SET CURRENT = FALSE WHERE USER_ID = ? AND CURRENT = TRUE")) {
+   preparedStatement.setLong(1, USER_ID);
+   int rowsUpdated = preparedStatement.executeUpdate();
+   if (rowsUpdated > 0) {
+    System.out.println("Снято current с " + rowsUpdated + " фото пользователя " + USER_ID);
+   }
+  } catch (SQLException e) {
    throw new RuntimeException(e);
   }
+ }
+
+ public Optional<Long> finduserid(Connection connectionlong, long USER_ID) throws SQLException, RuntimeException {
+
+  try (Connection connection = ConnectionManager.getConnection("jdbc:postgresql://localhost:5432/postgres", "postgres", "admin");
+       PreparedStatement preparedStatement = connection.prepareStatement("SELECT id, current, file_id, user_id, created_date, * FROM user_photos WHERE user_id= ? AND current = TRUE")) {
+   preparedStatement.setLong(1, USER_ID);
+   ResultSet resultSet = preparedStatement.executeQuery();
+   if (resultSet.next()) {
+    UserPhoto userPhoto = new UserPhoto();
+    userPhoto.setUserId(resultSet.getLong("USER_ID"));
+    userPhoto.setId(resultSet.getLong("ID"));
+    userPhoto.setCurrent(resultSet.getBoolean("CURRENT"));
+    return Optional.of(resultSet.getLong("FILE_ID"));
+   }
+  } catch (RuntimeException e) {
+   throw new RuntimeException(e);
+  }
+     return Optional.empty();
+ }
 }
-}
+
 
 
 
