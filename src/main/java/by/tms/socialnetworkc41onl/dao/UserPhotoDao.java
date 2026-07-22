@@ -20,8 +20,8 @@ public class UserPhotoDao {
   try (Connection con = ConnectionManager.getConnection("jdbc:postgresql://localhost:5432/postgres", "postgres", "admin");
        PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
    preparedStatement.setLong(1, photo.getFileId());
-   preparedStatement.setLong(2, photo.getUserId());
    preparedStatement.setBoolean(3, photo.isCurrent());
+   preparedStatement.setLong(2, photo.getUserId());
    int rows = preparedStatement.executeUpdate();
    if (rows != 1) {
     throw new SQLException("Ожидалась 1 строка, а затронуто: " + rows);
@@ -46,10 +46,10 @@ public class UserPhotoDao {
   }
  }
 
- public Optional<Long> finduserid(Connection connectionlong, long USER_ID) throws SQLException, RuntimeException {
+ public Optional<UserPhoto> finduserid(Connection connectionlong, long USER_ID) throws SQLException, RuntimeException {
 
   try (Connection connection = ConnectionManager.getConnection("jdbc:postgresql://localhost:5432/postgres", "postgres", "admin");
-       PreparedStatement preparedStatement = connection.prepareStatement("SELECT id, current, file_id, user_id, created_date, * FROM user_photos WHERE user_id= ? AND current = TRUE")) {
+       PreparedStatement preparedStatement = connection.prepareStatement("SELECT id, file_id, user_id, Created_date, * FROM user_photos WHERE user_id= ? AND current = TRUE")) {
    preparedStatement.setLong(1, USER_ID);
    ResultSet resultSet = preparedStatement.executeQuery();
    if (resultSet.next()) {
@@ -57,7 +57,7 @@ public class UserPhotoDao {
     userPhoto.setUserId(resultSet.getLong("USER_ID"));
     userPhoto.setId(resultSet.getLong("ID"));
     userPhoto.setCurrent(resultSet.getBoolean("CURRENT"));
-    return Optional.of(resultSet.getLong("USER_ID"));
+    return Optional.of(userPhoto);
    }
   } catch (RuntimeException e) {
    throw new RuntimeException(e);
