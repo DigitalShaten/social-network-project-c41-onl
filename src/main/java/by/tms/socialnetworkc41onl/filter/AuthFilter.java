@@ -1,3 +1,4 @@
+/*
 package by.tms.socialnetworkc41onl.filter;
 
 import by.tms.socialnetworkc41onl.service.SessionService;
@@ -61,3 +62,5 @@ public class AuthFilter extends HttpFilter {
 
     }
 }
+*/
+
