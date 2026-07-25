@@ -75,4 +75,22 @@ public class SubscriptionDao {
         }
         return ids;
     }
+
+    public List<Long> findFollowersUserIds(long userId) {
+        List<Long> ids = new ArrayList<>();
+        String sql = "SELECT user_id FROM subscriptions WHERE subscription_user_id = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setLong(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ids.add(rs.getLong("user_id"));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Ошибка получения списка подписок: " + e.getMessage(), e);
+        }
+        return ids;
+    }
 }
