@@ -17,12 +17,11 @@ public class FeedServlet extends HttpServlet {
     private final FeedService feedService = new FeedService();
     private final SessionService sessionService = new SessionService();
 
-    //TODO поправить, как будет assembler
-//    @Override
-//    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-//            throws ServletException, IOException {
-//        User current = sessionService.currentUser(request).orElseThrow();
-//        request.setAttribute("posts", feedService.feed(current.getId()));
-//        request.getRequestDispatcher("/WEB-INF/views/feed.jsp").forward(request, response);
-//    }
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        User current = sessionService.currentUser(request).orElseThrow();
+        request.setAttribute("posts", feedService.feed(current.getId()));
+        request.getRequestDispatcher("/WEB-INF/views/feed.jsp").forward(request, response);
+    }
 }

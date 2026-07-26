@@ -1,0 +1,64 @@
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%-- Рисует один PostView из переменной ${p}. Используется лентой и профилем. --%>
+<div class="post">
+  <div class="post-head">
+    <c:choose>
+      <c:when test="${not empty p.authorAvatarFileId}">
+        <img class="avatar-sm" src="${ctx}/files/${p.authorAvatarFileId}" alt="">
+      </c:when>
+      <c:otherwise><span class="avatar-sm"></span></c:otherwise>
+    </c:choose>
+    <a class="name" href="${ctx}/profile?userId=${p.authorId}">${p.authorName}</a>
+    <c:if test="${not p.ownPost and not p.subscribedToAuthor}">
+      <form method="post" action="${ctx}/subscription" style="display:inline;">
+        <input type="hidden" name="targetUserId" value="${p.authorId}">
+        <input type="hidden" name="action" value="subscribe">
+        <button type="submit" class="badge-tag" style="cursor:pointer;background:none;">Подписаться</button>
+      </form>
+    </c:if>
+    <c:if test="${not p.ownPost and p.subscribedToAuthor}">
+      <form method="post" action="${ctx}/subscription" style="display:inline;">
+        <input type="hidden" name="targetUserId" value="${p.authorId}">
+        <input type="hidden" name="action" value="unsubscribe">
+        <button type="submit" class="badge-tag" style="cursor:pointer;background:none;border-color:#c2c9d1;color:#6b7785;">Отписаться</button>
+      </form>
+    </c:if>
+    <span class="date">${p.createdTime}</span>
+  </div>
+
+  <c:if test="${not empty p.text}">
+    <div class="post-text">${p.text}</div>
+  </c:if>
+
+  <c:if test="${not empty p.photoFileIds}">
+    <div class="post-photos">
+      <c:forEach var="fileId" items="${p.photoFileIds}">
+        <img src="${ctx}/files/${fileId}" alt="">
+      </c:forEach>
+    </div>
+  </c:if>
+
+  <div class="post-actions">
+    <form method="post" action="${ctx}/reaction">
+      <input type="hidden" name="postId" value="${p.id}">
+      <input type="hidden" name="type" value="LIKE">
+      <button type="submit" class="icon-btn ${p.myReaction == 'LIKE' ? 'active-like' : ''}">&#128077; ${p.likes}</button>
+    </form>
+    <form method="post" action="${ctx}/reaction">
+      <input type="hidden" name="postId" value="${p.id}">
+      <input type="hidden" name="type" value="DISLIKE">
+      <button type="submit" class="icon-btn ${p.myReaction == 'DISLIKE' ? 'active-dislike' : ''}">&#128078; ${p.dislikes}</button>
+    </form>
+  </div>
+
+  <div class="comments">
+    <c:forEach var="cm" items="${p.comments}">
+      <div class="comment"><span class="cname">${cm.authorName}</span> ${cm.text}</div>
+    </c:forEach>
+    <form class="comment-form" method="post" action="${ctx}/comment">
+      <input type="hidden" name="postId" value="${p.id}">
+      <input type="text" name="text" placeholder="Comment ...">
+      <button type="submit" class="btn">&#10148;</button>
+    </form>
+  </div>
+</div>

@@ -71,22 +71,15 @@ public class PostReactionDao {
         }
     }
 
-    public Optional<ReactionType> findByUserAndPost(long userId, long postId) {
+    public Optional<PostReaction> findByUserAndPost(long userId, long postId) {
         try (Connection connection = ConnectionManager.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(FIND_REACTION_TYPE_BY_USER_AND_POST_SQL_QUERY)) {
 
             preparedStatement.setLong(1, postId);
             preparedStatement.setLong(2, userId);
 
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                if (resultSet.next()) {
-                    String reactionType = resultSet.getString("reaction_type");
-
-                    //Приводим строку к верхнему регистру, чтобы избежать ошибок при valueOf(),
-                    // например если вручную вписали в БД "Like" вместо "LIKE"
-                    return Optional.of(ReactionType.valueOf(reactionType.toUpperCase()));
-                }
-                return Optional.empty();
+            try (ResultSet result = preparedStatement.executeQuery()) {
+                return result.next() ? Optional.of(map(result)) : Optional.empty();
             }
 
         } catch (SQLException e) {
@@ -94,12 +87,12 @@ public class PostReactionDao {
         }
     }
 
-    public int countByPostAndType(long postId, String type) {
+    public int countByPostAndType(long postId, ReactionType type) {
         try (Connection connection = ConnectionManager.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(COUNT_REACTION_BY_TYPE_SQL_QUERY)) {
 
             preparedStatement.setLong(1, postId);
-            preparedStatement.setString(2, type);
+            preparedStatement.setString(2, type.name());
 
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 return resultSet.next() ? resultSet.getInt("amount") : 0;
@@ -108,5 +101,16 @@ public class PostReactionDao {
         } catch (SQLException ex) {
             throw new RuntimeException("Ошибка подсчета реакций по типу: LIKE или DISLIKE", ex);
         }
+    }
+
+    private PostReaction map(ResultSet result) throws SQLException {
+        PostReaction reaction = new PostReaction();
+        reaction.setId(result.getLong("ID"));
+        reaction.setReactionType(ReactionType.valueOf(result.getString("REACTION_TYPE")));
+        reaction.setUserId(result.getLong("USER_ID"));
+        reaction.setPostId(result.getLong("POST_ID"));
+        Timestamp created = result.getTimestamp("CREATED_DATE");
+        reaction.setCreatedDate(created == null ? null : created.toLocalDateTime());
+        return reaction;
     }
 }

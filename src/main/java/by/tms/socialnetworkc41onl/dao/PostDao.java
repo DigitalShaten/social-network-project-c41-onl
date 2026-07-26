@@ -32,6 +32,8 @@ public class PostDao {
     private static final String FIND_ALL_POSTS_BY_DATE =
             "SELECT * FROM POSTS ORDER BY CREATED_DATE DESC LIMIT ? OFFSET ?";
     private static final String FIND_ALL_POST_PHOTOS_BY_ID = "SELECT * FROM POST_PHOTOS WHERE POST_ID = ?";
+    private static final String SELECT_FEED = "SELECT ID, POST_TEXT, USER_ID, CREATED_DATE FROM POSTS ORDER BY CREATED_DATE DESC, ID DESC";
+
 
     /**
      * Сохраняет пост
@@ -233,5 +235,20 @@ public class PostDao {
         post.setUserId(resultSet.getLong("USER_ID"));
         post.setCreatedTime(resultSet.getObject("CREATED_DATE", LocalDateTime.class));
         return post;
+    }
+
+    /** Лента: все посты, новые сверху. */
+    public List<Post> findFeed() {
+        try (Connection connection = ConnectionManager.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SELECT_FEED);
+             ResultSet result = statement.executeQuery()) {
+            List<Post> posts = new ArrayList<>();
+            while (result.next()) {
+                posts.add(extractPost(result));
+            }
+            return posts;
+        } catch (SQLException error) {
+            throw new RuntimeException("Ошибка загрузки ленты", error);
+        }
     }
 }

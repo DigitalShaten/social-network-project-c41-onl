@@ -1,6 +1,7 @@
 package by.tms.socialnetworkc41onl.service;
 
 import by.tms.socialnetworkc41onl.dao.PostDao;
+import by.tms.socialnetworkc41onl.dto.PostDTO;
 
 import java.util.List;
 
@@ -8,10 +9,9 @@ import java.util.List;
 public class FeedService {
 
     private final PostDao postDao = new PostDao();
+    private final PostDTOAssembler assembler = new PostDTOAssembler();
 
-    //TODO расскоментить, как появиться метод
-    //private final PostViewAssembler assembler = new PostViewAssembler();
-
-    //public List<PostView> feed(long viewerId) {
-    //return assembler.assemble(postDao.findFeed(), viewerId);}
+    public List<PostDTO> feed(long viewerId) {
+        return assembler.assemble(postDao.findFeed(), viewerId);
+    }
 }
