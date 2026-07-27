@@ -1,9 +1,12 @@
 package by.tms.socialnetworkc41onl.service;
 
+import by.tms.socialnetworkc41onl.model.User;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+
+import java.util.Optional;
 
 public class SessionService {
 
@@ -18,6 +21,17 @@ public class SessionService {
     public static Long getUser(HttpSession session) {
         return session != null ? (Long) session.getAttribute(CURRENT_USER_ID_NAME) : null;
     }
+
+    /** Текущий пользователь из сессии. */
+    public Optional<User> currentUser(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            return Optional.empty();
+        }
+        Object user = session.getAttribute(CURRENT_USER_ID_NAME);
+        return user instanceof User ? Optional.of((User) user) : Optional.empty();
+    }
+
 
     public static void logout(HttpServletRequest request, HttpServletResponse response) {
 
