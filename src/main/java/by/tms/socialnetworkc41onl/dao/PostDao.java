@@ -24,64 +24,29 @@ import java.util.Optional;
  */
 public class PostDao {
 
+    private static final String INSERT = "INSERT INTO POSTS (POST_TEXT, USER_ID) VALUES (?, ?)";
     private static final String INSERT_POSTS = "INSERT INTO POSTS (POST_TEXT, USER_ID) VALUES (?, ?)";
     private static final String INSERT_POST_PHOTOS = "INSERT INTO POST_PHOTOS (FILE_ID, POST_ID) VALUES (?, ?)";
 
     private static final String FIND_POST_BY_ID = "SELECT * FROM POSTS WHERE ID = ?";
     private static final String FIND_ALL_POSTS_BY_USER_ID = "SELECT * FROM POSTS WHERE USER_ID = ?";
-    private static final String FIND_ALL_POSTS_BY_DATE =
-            "SELECT * FROM POSTS ORDER BY CREATED_DATE DESC LIMIT ? OFFSET ?";
+    private static final String FIND_ALL_POSTS_BY_DATE = "SELECT * FROM POSTS ORDER BY CREATED_DATE DESC LIMIT ? OFFSET ?";
     private static final String FIND_ALL_POST_PHOTOS_BY_ID = "SELECT * FROM POST_PHOTOS WHERE POST_ID = ?";
     private static final String SELECT_FEED = "SELECT ID, POST_TEXT, USER_ID, CREATED_DATE FROM POSTS ORDER BY CREATED_DATE DESC, ID DESC";
 
-
-    /**
-     * Сохраняет пост
-     *
-     * @param post   пост
-     * @param photos список фото поста
-     * @return пост с ID
-     */
-    public Post save(Post post, List<File> photos) {
-        try (Connection connection = ConnectionManager.getConnection()) {
-            /*Необходимо сохранять все компоненты поста в составе транзакции*/
-            connection.setAutoCommit(false);
-            /*Загрузить пост в таблицу POSTS*/
-            PreparedStatement postStatement = connection.prepareStatement(INSERT_POSTS,
-                    Statement.RETURN_GENERATED_KEYS);
-            postStatement.setString(1, post.getPostText());
-            postStatement.setLong(2, post.getUserId());
-            postStatement.executeUpdate();
-            try (ResultSet generatedKeys = postStatement.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    /*Получить сгенерированный ID поста*/
-                    long postID = generatedKeys.getLong(1);
-                    /*Все фото связаны с одним постом*/
-                    PreparedStatement photoStatement = connection.prepareStatement(INSERT_POST_PHOTOS,
-                            Statement.RETURN_GENERATED_KEYS);
-                    photoStatement.setLong(2, postID);
-                    /*Для всех фото*/
-                    FileDao fileDao = new FileDao();
-                    for (File currentPhoto : photos) {
-                        /*Загрузить фото в таблицу FILES и получить ID*/
-                        photoStatement.setLong(1, fileDao.save(connection, currentPhoto).getId());
-                        /*Добавить запись поста и фото в таблицу POST_PHOTOS*/
-                        photoStatement.executeUpdate();
-                    }
-                    /*Нижняя граница транзакции*/
-                    connection.commit();
-                    post.setId(postID);
-                    return post;
-                } else {
-                    connection.rollback();
-                    throw new SQLException("Не удалось получить сгенерированный ID поста");
+    public Post save(Connection connection, Post post) {
+        try (PreparedStatement statement = connection.prepareStatement(INSERT, Statement.RETURN_GENERATED_KEYS)) {
+            statement.setString(1, post.getPostText());
+            statement.setLong(2, post.getUserId());
+            statement.executeUpdate();
+            try (ResultSet keys = statement.getGeneratedKeys()) {
+                if (keys.next()) {
+                    post.setId(keys.getLong(1));
                 }
-            } catch (SQLException e) {
-                connection.rollback();
-                throw new SQLException("Не удалось получить сгенерированный ID поста");
             }
-        } catch (SQLException e) {
-            throw new RuntimeException("Ошибка при сохранении поста", e);
+            return post;
+        } catch (SQLException error) {
+            throw new RuntimeException("Ошибка сохранения поста", error);
         }
     }
 

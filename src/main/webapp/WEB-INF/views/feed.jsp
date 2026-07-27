@@ -12,8 +12,8 @@
   <div class="card hint">Постов пока нет. Создайте первый!</div>
 </c:if>
 
-<%--<c:forEach var="p" items="${posts}">--%>
-<%--  <%@ include file="/WEB-INF/views/common/post-card.jspf" %>--%>
-<%--</c:forEach>--%>
+<c:forEach var="p" items="${posts}">
+  <%@ include file="/WEB-INF/views/common/post-card.jspf" %>
+</c:forEach>
 
 <jsp:include page="/WEB-INF/views/common/_footer.jsp" />
