@@ -38,59 +38,38 @@ public class PostReactionDao {
         }
     }
 
-    public void update(PostReaction postReaction) {
+    public void update(long id, ReactionType type) {
         try (Connection connection = ConnectionManager.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_REACTION_TYPE_SQL_QUERY)) {
-
-            ReactionType currentType = postReaction.getReactionType();
-
-            //Замена LIKE -> DISLIKE или DISLIKE -> LIKE
-            ReactionType newType = (currentType.equals(ReactionType.LIKE))
-                    ? ReactionType.DISLIKE
-                    : ReactionType.LIKE;
-            preparedStatement.setString(1, newType.name());
-            preparedStatement.setLong(2, postReaction.getId());
-            preparedStatement.executeUpdate();
-
-        } catch (SQLException e) {
-            throw new RuntimeException("Ошибка обновления реакции на пост.", e);
+             PreparedStatement statement = connection.prepareStatement(UPDATE_REACTION_TYPE_SQL_QUERY)) {
+            statement.setString(1, type.name());
+            statement.setLong(2, id);
+            statement.executeUpdate();
+        } catch (SQLException error) {
+            throw new RuntimeException("Ошибка обновления реакции", error);
         }
     }
 
     // Удаляем реакцию конкретного пользователя на конкретный пост
-    public void delete(long userId, long postId) {
+    public void delete(long id) {
         try (Connection connection = ConnectionManager.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(DELETE_REACTION_SQL_QUERY)) {
-
-            preparedStatement.setLong(1, postId);
-            preparedStatement.setLong(2, userId);
-            preparedStatement.executeUpdate();
-
-        } catch (SQLException e) {
-            throw new RuntimeException("Ошибка удаления реакции", e);
+             PreparedStatement statement = connection.prepareStatement(DELETE_REACTION_SQL_QUERY)) {
+            statement.setLong(1, id);
+            statement.executeUpdate();
+        } catch (SQLException error) {
+            throw new RuntimeException("Ошибка удаления реакции", error);
         }
     }
 
-    public Optional<ReactionType> findByUserAndPost(long userId, long postId) {
+    public Optional<PostReaction> findByUserAndPost(long userId, long postId) {
         try (Connection connection = ConnectionManager.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(FIND_REACTION_TYPE_BY_USER_AND_POST_SQL_QUERY)) {
-
-            preparedStatement.setLong(1, postId);
-            preparedStatement.setLong(2, userId);
-
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                if (resultSet.next()) {
-                    String reactionType = resultSet.getString("reaction_type");
-
-                    //Приводим строку к верхнему регистру, чтобы избежать ошибок при valueOf(),
-                    // например если вручную вписали в БД "Like" вместо "LIKE"
-                    return Optional.of(ReactionType.valueOf(reactionType.toUpperCase()));
-                }
-                return Optional.empty();
+             PreparedStatement statement = connection.prepareStatement(FIND_REACTION_TYPE_BY_USER_AND_POST_SQL_QUERY)) {
+            statement.setLong(1, userId);
+            statement.setLong(2, postId);
+            try (ResultSet result = statement.executeQuery()) {
+                return result.next() ? Optional.of(map(result)) : Optional.empty();
             }
-
-        } catch (SQLException e) {
-            throw new RuntimeException("Ошибка поиска реакции по id пользователя и id поста", e);
+        } catch (SQLException error) {
+            throw new RuntimeException("Ошибка поиска реакции", error);
         }
     }
 
@@ -108,5 +87,16 @@ public class PostReactionDao {
         } catch (SQLException ex) {
             throw new RuntimeException("Ошибка подсчета реакций по типу: LIKE или DISLIKE", ex);
         }
+    }
+
+    private PostReaction map(ResultSet result) throws SQLException {
+        PostReaction reaction = new PostReaction();
+        reaction.setId(result.getLong("ID"));
+        reaction.setReactionType(ReactionType.valueOf(result.getString("REACTION_TYPE")));
+        reaction.setUserId(result.getLong("USER_ID"));
+        reaction.setPostId(result.getLong("POST_ID"));
+        Timestamp created = result.getTimestamp("CREATED_DATE");
+        reaction.setCreatedDate(created == null ? null : created.toLocalDateTime());
+        return reaction;
     }
 }
