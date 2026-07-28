@@ -7,7 +7,6 @@
 
 package by.tms.socialnetworkc41onl.dto;
 
-import by.tms.socialnetworkc41onl.model.File;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -24,7 +23,7 @@ public class ProfileDto {
     String about;
 
     /*Данные из USER_PHOTOS*/
-    File avatar;
+    long avatarFileId;
 
     /*Данные из POSTS*/
     int postsCounter;

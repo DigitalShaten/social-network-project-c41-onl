@@ -48,6 +48,7 @@ public class ProfileServlet extends HttpServlet {
             profileDto = profileService.fetchProfileData(userID, req);
         } catch (SQLException e) {
             getServletContext().getRequestDispatcher("/WEB-INF/views/error/404.jsp").forward(req, resp);
+            return;
         }
 
         /*Объект DTO получен*/
@@ -64,11 +65,13 @@ public class ProfileServlet extends HttpServlet {
         if (reqSubscribe == null) {
             /*Ошибка запроса*/
             getServletContext().getRequestDispatcher("/WEB-INF/views/error/404.jsp").forward(req, resp);
+            return;
         }
 
         if (reqSubscriptionId == null) {
             /*Ошибка запроса -- на себя подписаться нельзя*/
             getServletContext().getRequestDispatcher("/WEB-INF/views/error/404.jsp").forward(req, resp);
+            return;
         }
 
         long subscriptionID = Long.parseLong(reqSubscriptionId);
@@ -85,6 +88,7 @@ public class ProfileServlet extends HttpServlet {
             }
             catch (Exception e) {
                 getServletContext().getRequestDispatcher("/WEB-INF/views/error/404.jsp").forward(req, resp);
+                return;
             }
             resp.sendRedirect("profile?userId=" + subscriptionID);
         }
@@ -95,6 +99,7 @@ public class ProfileServlet extends HttpServlet {
             }
             catch (Exception e) {
                 getServletContext().getRequestDispatcher("/WEB-INF/views/error/404.jsp").forward(req, resp);
+                return;
             }
             resp.sendRedirect("profile?userId=" + subscriptionID);
         }
