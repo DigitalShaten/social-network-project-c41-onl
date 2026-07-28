@@ -54,7 +54,7 @@ public class ProfileService {
             SubscriptionDao subscriptionDao = new SubscriptionDao();
             userData.setSubscriptionsCounter(subscriptionDao.findSubscriptionUserIds(userId).size());
             /*Получить количество подписчиков*/
-            userData.setFollowersCounter(subscriptionDao.findFollowersUserIds(userId).size());
+            userData.setFollowersCounter(subscriptionDao.findSubscriptionUserIds(userId).size());
             /*Определить, подписан ли пользователь сессии на текущего пользователя*/
             userData.setSubscribed(subscriptionDao.exists(userId, SessionService.getUser(req.getSession())));
 
