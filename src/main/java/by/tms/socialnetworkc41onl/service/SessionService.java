@@ -13,9 +13,17 @@ public class SessionService {
     private static final String CURRENT_USER_ID_NAME = "userId";
     private static final String COOKIE_NAME = "userIdCookie";
 
+    public Optional<User> currentUser(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            return Optional.empty();
+        }
+        Object user = session.getAttribute(CURRENT_USER_ID_NAME);
+        return user instanceof User ? Optional.of((User) user) : Optional.empty();
+    }
+
     public static void setUser(HttpSession session, Long userId) {
         session.setAttribute(CURRENT_USER_ID_NAME, userId);
-
     }
 
     public static Long getUser(HttpSession session) {

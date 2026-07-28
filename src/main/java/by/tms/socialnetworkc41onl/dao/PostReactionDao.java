@@ -62,10 +62,12 @@ public class PostReactionDao {
 
     public Optional<PostReaction> findByUserAndPost(long userId, long postId) {
         try (Connection connection = ConnectionManager.getConnection();
-             PreparedStatement statement = connection.prepareStatement(FIND_REACTION_TYPE_BY_USER_AND_POST_SQL_QUERY)) {
-            statement.setLong(1, userId);
-            statement.setLong(2, postId);
-            try (ResultSet result = statement.executeQuery()) {
+             PreparedStatement preparedStatement = connection.prepareStatement(FIND_REACTION_TYPE_BY_USER_AND_POST_SQL_QUERY)) {
+
+            preparedStatement.setLong(1, postId);
+            preparedStatement.setLong(2, userId);
+
+            try (ResultSet result = preparedStatement.executeQuery()) {
                 return result.next() ? Optional.of(map(result)) : Optional.empty();
             }
         } catch (SQLException error) {
@@ -73,12 +75,12 @@ public class PostReactionDao {
         }
     }
 
-    public int countByPostAndType(long postId, String type) {
+    public int countByPostAndType(long postId, ReactionType type) {
         try (Connection connection = ConnectionManager.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(COUNT_REACTION_BY_TYPE_SQL_QUERY)) {
 
             preparedStatement.setLong(1, postId);
-            preparedStatement.setString(2, type);
+            preparedStatement.setString(2, type.name());
 
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 return resultSet.next() ? resultSet.getInt("amount") : 0;
