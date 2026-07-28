@@ -30,6 +30,17 @@ public class SessionService {
         return session != null ? (Long) session.getAttribute(CURRENT_USER_ID_NAME) : null;
     }
 
+    /** Текущий пользователь из сессии. */
+    public Optional<User> currentUser(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            return Optional.empty();
+        }
+        Object user = session.getAttribute(CURRENT_USER_ID_NAME);
+        return user instanceof User ? Optional.of((User) user) : Optional.empty();
+    }
+
+
     public static void logout(HttpServletRequest request, HttpServletResponse response) {
 
         //Берем текущую сессию, если её нет, НЕ создаем новую

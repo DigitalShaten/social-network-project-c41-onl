@@ -38,36 +38,25 @@ public class PostReactionDao {
         }
     }
 
-    public void update(PostReaction postReaction) {
+    public void update(long id, ReactionType type) {
         try (Connection connection = ConnectionManager.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_REACTION_TYPE_SQL_QUERY)) {
-
-            ReactionType currentType = postReaction.getReactionType();
-
-            //Замена LIKE -> DISLIKE или DISLIKE -> LIKE
-            ReactionType newType = (currentType.equals(ReactionType.LIKE))
-                    ? ReactionType.DISLIKE
-                    : ReactionType.LIKE;
-            preparedStatement.setString(1, newType.name());
-            preparedStatement.setLong(2, postReaction.getId());
-            preparedStatement.executeUpdate();
-
-        } catch (SQLException e) {
-            throw new RuntimeException("Ошибка обновления реакции на пост.", e);
+             PreparedStatement statement = connection.prepareStatement(UPDATE_REACTION_TYPE_SQL_QUERY)) {
+            statement.setString(1, type.name());
+            statement.setLong(2, id);
+            statement.executeUpdate();
+        } catch (SQLException error) {
+            throw new RuntimeException("Ошибка обновления реакции", error);
         }
     }
 
     // Удаляем реакцию конкретного пользователя на конкретный пост
-    public void delete(long userId, long postId) {
+    public void delete(long id) {
         try (Connection connection = ConnectionManager.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(DELETE_REACTION_SQL_QUERY)) {
-
-            preparedStatement.setLong(1, postId);
-            preparedStatement.setLong(2, userId);
-            preparedStatement.executeUpdate();
-
-        } catch (SQLException e) {
-            throw new RuntimeException("Ошибка удаления реакции", e);
+             PreparedStatement statement = connection.prepareStatement(DELETE_REACTION_SQL_QUERY)) {
+            statement.setLong(1, id);
+            statement.executeUpdate();
+        } catch (SQLException error) {
+            throw new RuntimeException("Ошибка удаления реакции", error);
         }
     }
 
@@ -81,9 +70,8 @@ public class PostReactionDao {
             try (ResultSet result = preparedStatement.executeQuery()) {
                 return result.next() ? Optional.of(map(result)) : Optional.empty();
             }
-
-        } catch (SQLException e) {
-            throw new RuntimeException("Ошибка поиска реакции по id пользователя и id поста", e);
+        } catch (SQLException error) {
+            throw new RuntimeException("Ошибка поиска реакции", error);
         }
     }
 
