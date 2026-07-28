@@ -33,6 +33,9 @@ public class PostService {
         if (!hasText && !hasPhotos) {
             throw new ServiceException("Пост не может быть пустым.");
         }
+        if (hasPhotos && photos.size() > 5) {
+            throw new ServiceException("Не больше 5 фотографий на пост.");
+        }
 
         try (Connection connection = ConnectionManager.getConnection()) {
             connection.setAutoCommit(false);

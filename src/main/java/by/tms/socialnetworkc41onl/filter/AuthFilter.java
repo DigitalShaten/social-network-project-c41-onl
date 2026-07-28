@@ -1,4 +1,3 @@
-/*
 package by.tms.socialnetworkc41onl.filter;
 
 import by.tms.socialnetworkc41onl.service.SessionService;
@@ -8,7 +7,6 @@ import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.util.Set;
@@ -16,51 +14,41 @@ import java.util.Set;
 @WebFilter("/*")
 public class AuthFilter extends HttpFilter {
 
-    Set<String> publicUrls = Set.of(
-            "/login",
-            "/logout",
-            "/registration",
-            "/registration/confirm",
-            "/recovery",
-            "/recovery/reset",
-            "/files/",
-            "/resources/",
-            "/error/"
-
+    private static final Set<String> PUBLIC_PATHS = Set.of(
+            "/login", "/logout",
+            "/registration", "/registration/confirm",
+            "/recovery", "/recovery/reset",
+            "/hello-servlet"
     );
 
+    private static final Set<String> PUBLIC_PREFIXES = Set.of("/files/", "/resources/");
+
     @Override
-    protected void doFilter(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException, ServletException {
+    protected void doFilter(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
+            throws IOException, ServletException {
 
-        SessionService.checkMeOut(req); // пытаемся восстановить пользователя по Cookie
+        req.setCharacterEncoding("UTF-8");
+        SessionService.checkMeOut(req); // попытка восстановить пользователя по cookie
 
-        // Берём актуальную сессию (она могла появиться в checkMeOut), если её нет – создаем
-        HttpSession session = req.getSession();
+        String path = req.getRequestURI().substring(req.getContextPath().length());
 
-        Long userId = SessionService.getUser(session);
-
-        String path = req.getServletPath();
-
-        //Проверяем начинается ли наш путь запроса со списком разрешенных url
-        boolean isPublic = publicUrls.stream()
-                .anyMatch(path::startsWith);
-
-        // Пропускаем, если пути публичные
-        if (isPublic) {
+        if (isPublic(path) || SessionService.getUser(req.getSession()) != null) {
             chain.doFilter(req, res);
             return;
         }
+        res.sendRedirect(req.getContextPath() + "/login");
+    }
 
-        //Если пользователь не зарегистрирован – перенаправляем на регистрацию
-        if (userId == null) {
-            res.sendRedirect("/login");
-            return;
+    private boolean isPublic(String path) {
+        if (PUBLIC_PATHS.contains(path)) {
+            return true;
         }
-
-        // Все проверки прошли – пропускаем запрос
-        chain.doFilter(req, res);
-
+        for (String prefix : PUBLIC_PREFIXES) {
+            if (path.startsWith(prefix)) {
+                return true;
+            }
+        }
+        return path.endsWith(".css") || path.endsWith(".js")
+                || path.endsWith(".png") || path.endsWith(".ico");
     }
 }
-*/
-

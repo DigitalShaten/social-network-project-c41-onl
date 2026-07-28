@@ -58,6 +58,28 @@ public class SubscriptionDao {
         }
     }
 
+    /** Сколько пользователей подписано на данного (Followers). */
+    public long countFollowers(long userId) {
+        return count("SELECT COUNT(*) FROM subscriptions WHERE subscription_user_id = ?", userId);
+    }
+
+    /** На скольких подписан данный пользователь (Following). */
+    public long countFollowing(long userId) {
+        return count("SELECT COUNT(*) FROM subscriptions WHERE user_id = ?", userId);
+    }
+
+    private long count(String sql, long id) {
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getLong(1) : 0L;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Ошибка подсчёта подписок: " + e.getMessage(), e);
+        }
+    }
+
     public List<Long> findSubscriptionUserIds(long userId) {
         List<Long> ids = new ArrayList<>();
         String sql = "SELECT subscription_user_id FROM subscriptions WHERE user_id = ?";

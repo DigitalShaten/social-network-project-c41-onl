@@ -5,6 +5,7 @@ import by.tms.socialnetworkc41onl.dao.PostPhotoDao;
 import by.tms.socialnetworkc41onl.dao.PostReactionDao;
 import by.tms.socialnetworkc41onl.dao.SubscriptionDao;
 import by.tms.socialnetworkc41onl.dao.UserDao;
+import by.tms.socialnetworkc41onl.dao.UserPhotoDao;
 import by.tms.socialnetworkc41onl.model.Comment;
 import by.tms.socialnetworkc41onl.model.Post;
 import by.tms.socialnetworkc41onl.model.PostPhoto;
@@ -14,6 +15,8 @@ import by.tms.socialnetworkc41onl.model.User;
 import by.tms.socialnetworkc41onl.dto.CommentDTO;
 import by.tms.socialnetworkc41onl.dto.PostDTO;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,10 +25,12 @@ import java.util.Optional;
 
 /** Класс собирает готовые к показу PostDTO из постов */
 public class PostDTOAssembler {
+
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("HH:mm dd.MM.yyyy");
+
     private final UserDao userDao = new UserDao();
 
-    /** TODO поправить, как будет UserPhotoDao */
-//    private final UserPhotoDao userPhotoDao = new UserPhotoDao();
+    private final UserPhotoDao userPhotoDao = new UserPhotoDao();
     private final PostPhotoDao postPhotoDao = new PostPhotoDao();
     private final PostReactionDao postReactionDao = new PostReactionDao();
     private final CommentDao commentDao = new CommentDao();
@@ -46,6 +51,7 @@ public class PostDTOAssembler {
         view.setId(post.getId());
         view.setText(post.getPostText());
         view.setCreatedTime(post.getCreatedTime());
+        view.setCreatedTimeText(formatDate(post.getCreatedTime()));
         view.setAuthorId(post.getUserId());
         view.setOwnPost(post.getUserId() == dtoId);
 
@@ -54,7 +60,7 @@ public class PostDTOAssembler {
             view.setAuthorName(author.getUserName());
         }
 
-        view.setAuthorAvatarField(avatar(post.getUserId(), avatarCache));
+        view.setAuthorAvatarFileId(avatar(post.getUserId(), avatarCache));
 
         List<Long> photoIds = new ArrayList<>();
         for (PostPhoto photo : postPhotoDao.findByPostId(post.getId())) {
@@ -90,10 +96,12 @@ public class PostDTOAssembler {
         return cache.computeIfAbsent(id, key -> userDao.findById(key).orElse(null));
     }
 
+    private String formatDate(LocalDateTime dateTime) {
+        return dateTime == null ? "" : dateTime.format(DATE_FORMAT);
+    }
+
     private Long avatar(long userId, Map<Long, Long> cache) {
-        //TODO временно null
-        return null;
-        //return cache.computeIfAbsent(userId, key -> userPhotoDao.findCurrentByUserId(key).map(p -> p.getFileId()).orElse(null));
+        return cache.computeIfAbsent(userId, userPhotoDao::getCurrentPhotoFileIdOrNull);
     }
 
 }

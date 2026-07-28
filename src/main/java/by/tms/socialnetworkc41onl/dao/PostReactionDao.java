@@ -11,8 +11,8 @@ public class PostReactionDao {
 
     private final String SAVE_REACTION_SQL_QUERY = "INSERT INTO post_reactions(reaction_type, user_id,post_id) VALUES(?,?,?)";
     private final String UPDATE_REACTION_TYPE_SQL_QUERY = "UPDATE post_reactions SET reaction_type=? WHERE id=?";
-    private final String DELETE_REACTION_SQL_QUERY = "DELETE FROM post_reactions WHERE post_id=? AND user_id=?";
-    private final String FIND_REACTION_TYPE_BY_USER_AND_POST_SQL_QUERY = "SELECT reaction_type FROM post_reactions WHERE post_id=? AND user_id=?";
+    private final String DELETE_REACTION_SQL_QUERY = "DELETE FROM post_reactions WHERE id=?";
+    private final String FIND_REACTION_TYPE_BY_USER_AND_POST_SQL_QUERY = "SELECT id, reaction_type, user_id, post_id, created_date FROM post_reactions WHERE post_id=? AND user_id=?";
     private final String COUNT_REACTION_BY_TYPE_SQL_QUERY = "SELECT COUNT(*) AS amount FROM post_reactions WHERE post_id=? AND reaction_type=?";
 
     public PostReaction save(PostReaction postReaction) {

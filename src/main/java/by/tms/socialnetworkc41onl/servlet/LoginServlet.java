@@ -3,6 +3,7 @@ package by.tms.socialnetworkc41onl.servlet;
 import by.tms.socialnetworkc41onl.dao.UserDao;
 import by.tms.socialnetworkc41onl.model.User;
 import by.tms.socialnetworkc41onl.service.AuthService;
+import by.tms.socialnetworkc41onl.service.SessionService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
@@ -22,8 +23,8 @@ public class LoginServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (req.getSession().getAttribute("currentUser") != null) {
-            resp.sendRedirect(req.getContextPath() + "/hello-servlet");
+        if (SessionService.getUser(req.getSession()) != null) {
+            resp.sendRedirect(req.getContextPath() + "/feed");
             return;
         }
         req.getRequestDispatcher("/WEB-INF/views/authentication/login.jsp").forward(req, resp);
@@ -40,17 +41,14 @@ public class LoginServlet extends HttpServlet {
             User user = authService.authenticate(email, password);
 
             HttpSession session = req.getSession();
-            session.setAttribute("currentUser", user);
+            SessionService.setUser(session, user);
 
-            // "Запомнить меня"
-            if ("true".equals(rememberMe)) {
-                Cookie rememberCookie = new Cookie("remember_me", email);
-                rememberCookie.setMaxAge(60 * 60 * 24 * 30); // 30 дней
-                rememberCookie.setPath(req.getContextPath());
-                resp.addCookie(rememberCookie);
+            // "Запомнить меня" — cookie с id, как ждёт AuthFilter/SessionService
+            if ("true".equals(rememberMe) || "on".equals(rememberMe)) {
+                SessionService.rememberMe(resp, user.getId());
             }
 
-            resp.sendRedirect(req.getContextPath() + "/hello-servlet");
+            resp.sendRedirect(req.getContextPath() + "/feed");
 
         } catch (AuthenticationException e) {
             req.setAttribute("error", e.getMessage());

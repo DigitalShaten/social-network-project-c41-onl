@@ -1,87 +1,72 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: Aleksei Borzetsov
-  Date: 25.07.2026
-  Time: 11:04
-  To change this template use File | Settings | File Templates.
---%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%
-    response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // HTTP 1.1
-    response.setHeader("Pragma", "no-cache"); // HTTP 1.0
-    response.setDateHeader("Expires", 0); // Прокси-серверы
-%>
-<html>
-<head>
-    <title>Title</title>
-</head>
-<body>
 <jsp:include page="/WEB-INF/views/common/_header.jsp"/>
-<div class="container ms-1">
-    <div class="row">
-        <div class="col-6">
-            <div class="card">
-                <div class="row g-0">
-                    <div class="col-2">
-                        <img src="/resources/img/icons/userDefaultImage.png" class="img-fluid rounded-start" alt="...">
-                    </div>
-                    <div class="col">
-                        <div class="card-body">
-                            <h5 class="card-title">${profileDto.firstName} ${profileDto.lastName}</h5>
-                            <p class="card-text"><small class="text-body-secondary">${profileDto.birthDay}</small></p>
-                            <p class="card-text"><small class="text-body-secondary">About</small></p>
-                            <p class="card-text">${profileDto.about}</p>
-                        </div>
-                    </div>
-                    <div class="col-5">
-                        <div class="row mt-4">
-                            <div class="col-6" style="min-width: 100px;">
-                                <p>Posts</p>
-                            </div>
-                            <div class="col">
-                                <span class="badge rounded-pill text-bg-primary">${profileDto.postsCounter}</span>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-6" style="min-width: 100px;">
-                                <p>Followers</p>
-                            </div>
-                            <div class="col">
-                                <span class="badge rounded-pill text-bg-primary">${profileDto.subscriptionsCounter}</span>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-6" style="min-width: 100px;">
-                                <p>Following</p>
-                            </div>
-                            <div class="col">
-                                <span class="badge rounded-pill text-bg-primary">${profileDto.followersCounter}</span>
-                            </div>
-                        </div>
-                    </div>
+<c:set var="ctx" value="${pageContext.request.contextPath}"/>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="row g-3 align-items-center">
+            <div class="col-auto">
+                <c:choose>
+                    <c:when test="${profileDto.avatarFileId > 0}">
+                        <img src="${ctx}/files/${profileDto.avatarFileId}" class="rounded-circle border"
+                             style="width:96px;height:96px;object-fit:cover;" alt="avatar">
+                    </c:when>
+                    <c:otherwise>
+                        <img src="${ctx}/resources/img/icons/userDefaultImage.png" class="rounded-circle border"
+                             style="width:96px;height:96px;object-fit:cover;" alt="avatar">
+                    </c:otherwise>
+                </c:choose>
+            </div>
+            <div class="col">
+                <h4 class="mb-0">${profileDto.userName}</h4>
+                <div class="text-secondary">${profileDto.firstName} ${profileDto.lastName}</div>
+                <c:if test="${not empty profileDto.birthDay}">
+                    <div class="text-secondary small">${profileDto.birthDay}</div>
+                </c:if>
+                <div class="mt-2">${profileDto.about}</div>
+            </div>
+            <div class="col-auto">
+                <div class="d-flex gap-4 text-center">
+                    <div><div class="fs-5 fw-semibold">${profileDto.postsCounter}</div><div class="text-secondary small">Posts</div></div>
+                    <div><div class="fs-5 fw-semibold">${profileDto.followersCounter}</div><div class="text-secondary small">Followers</div></div>
+                    <div><div class="fs-5 fw-semibold">${profileDto.subscriptionsCounter}</div><div class="text-secondary small">Following</div></div>
                 </div>
             </div>
         </div>
-    </div>
-    <!-- Если зашли на страницу профиля другого пользователя -->
-    <c:if test="${currentUser == false}">
-        <div class="row">
-            <!-- Кнопка подписаться/отписаться -->
-            <div class="col-6">
-                <form action="${pageContext.request.contextPath}" method="post">
-                    <c:if test="${profileDto.subscribed == true}">
-                        <button type="submit" name="subscribe" value="false" class="btn btn-primary">Отписаться</button>
-                    </c:if>
-                    <c:if test="${profileDto.subscribed == false}">
-                        <button type="submit" name="subscribe" value="true" class="btn btn-primary">Подписаться</button>
-                    </c:if>
+
+        <!-- Кнопка подписки только для чужого профиля -->
+        <c:if test="${currentUser == false}">
+            <div class="mt-3">
+                <form action="${ctx}/subscription" method="post">
+                    <input type="hidden" name="targetUserId" value="${profileDto.userId}">
+                    <c:choose>
+                        <c:when test="${profileDto.subscribed}">
+                            <input type="hidden" name="action" value="unsubscribe">
+                            <button type="submit" class="btn btn-outline-secondary">Отписаться</button>
+                        </c:when>
+                        <c:otherwise>
+                            <input type="hidden" name="action" value="subscribe">
+                            <button type="submit" class="btn text-white" style="background-color:#5C7CFA;">Подписаться</button>
+                        </c:otherwise>
+                    </c:choose>
                 </form>
             </div>
-        </div>
-    </c:if>
+        </c:if>
+        <c:if test="${currentUser == true}">
+            <div class="mt-3">
+                <a href="${ctx}/profile/edit" class="btn btn-outline-secondary">Редактировать профиль</a>
+            </div>
+        </c:if>
+    </div>
 </div>
+
+<h5 class="mt-4 mb-3">Посты</h5>
+<c:if test="${empty profileDto.posts}">
+    <div class="text-secondary">Постов пока нет.</div>
+</c:if>
+<c:forEach var="p" items="${profileDto.posts}">
+    <%@ include file="/WEB-INF/views/common/post-card.jspf" %>
+</c:forEach>
+
 <jsp:include page="/WEB-INF/views/common/_footer.jsp"/>
-<br/>
-</body>
-</html>

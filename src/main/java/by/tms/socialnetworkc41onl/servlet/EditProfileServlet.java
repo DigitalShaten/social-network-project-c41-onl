@@ -2,9 +2,9 @@ package by.tms.socialnetworkc41onl.servlet;
 
 import by.tms.socialnetworkc41onl.constant.Gender;
 import by.tms.socialnetworkc41onl.constant.Status;
+import by.tms.socialnetworkc41onl.dto.PostDTO;
+import by.tms.socialnetworkc41onl.dto.ProfileDto;
 import by.tms.socialnetworkc41onl.model.FileData;
-import by.tms.socialnetworkc41onl.model.dto.EditProfileDto;
-import by.tms.socialnetworkc41onl.model.dto.UserProfileDto;
 import by.tms.socialnetworkc41onl.service.ProfileUserService;
 import by.tms.socialnetworkc41onl.service.SessionService;
 import jakarta.servlet.ServletException;
@@ -47,7 +47,7 @@ public class EditProfileServlet extends HttpServlet {
     }
 
     private void redirectToEditProfile(HttpServletRequest req, HttpServletResponse resp, Long userId) throws ServletException, IOException {
-        UserProfileDto userProfileDto = profileUserService.getUserProfileDtoByUserId(userId);
+        ProfileDto.UserProfileDto userProfileDto = profileUserService.getUserProfileDtoByUserId(userId);
 
         req.setAttribute("userId", userProfileDto.userId());
         req.setAttribute("firstName", userProfileDto.firstName());
@@ -83,7 +83,7 @@ public class EditProfileServlet extends HttpServlet {
         String about = req.getParameter("about");
         Part filePart = req.getPart("user-photo");        
         FileData userPhoto = getPhotoOrNull(filePart);
-        var editProfileDto = new EditProfileDto(userId,firstName,lastName,gender,birthday,about,userPhoto);
+        var editProfileDto = new PostDTO.EditProfileDto(userId,firstName,lastName,gender,birthday,about,userPhoto);
         profileUserService.editProfile(editProfileDto);
 
         req.setAttribute("status", Status.SUCCESS);

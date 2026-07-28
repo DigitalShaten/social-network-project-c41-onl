@@ -2,6 +2,7 @@ package by.tms.socialnetworkc41onl.service;
 
 import by.tms.socialnetworkc41onl.dao.UserDao;
 import by.tms.socialnetworkc41onl.model.User;
+import by.tms.socialnetworkc41onl.util.PasswordUtil;
 import javax.naming.AuthenticationException;
 import java.util.Optional;
 
@@ -27,7 +28,7 @@ public class AuthService {
         User user = userOptional.get();
 
         // 2. Сверяем хэш пароля
-        if (!user.getPasswordHash().equals(password)) {
+        if (!PasswordUtil.verify(password, user.getPasswordHash())) {
             throw new AuthenticationException("Incorrect email or password!!");
         }
 

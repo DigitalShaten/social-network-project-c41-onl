@@ -19,6 +19,7 @@ public class CommentServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
         User current = sessionService.currentUser(request).orElseThrow();
         try {
             long postId = Long.parseLong(request.getParameter("postId"));

@@ -10,8 +10,7 @@ public class CommentService {
 
     public Comment add(long userId, long postId, String text) {
         if (text == null || text.isBlank()) {
-            //@TODO поправить нужной ошибкой
-            System.out.println("Комментарий не может быть пустым");
+            return null; // пустой комментарий не сохраняем
         }
         Comment comment = new Comment();
         comment.setUserId(userId);

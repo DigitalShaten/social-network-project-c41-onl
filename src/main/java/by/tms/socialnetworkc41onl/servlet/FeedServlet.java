@@ -21,7 +21,9 @@ public class FeedServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         User current = sessionService.currentUser(request).orElseThrow();
-        request.setAttribute("posts", feedService.feed(current.getId()));
+        boolean subscriptionsOnly = "subscriptions".equals(request.getParameter("filter"));
+        request.setAttribute("posts", feedService.feed(current.getId(), subscriptionsOnly));
+        request.setAttribute("filter", subscriptionsOnly ? "subscriptions" : "all");
         request.getRequestDispatcher("/WEB-INF/views/feed.jsp").forward(request, response);
     }
 }

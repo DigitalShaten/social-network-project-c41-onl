@@ -12,8 +12,7 @@ public class SubscriptionService {
 
     public void subscribe(long userId, long targetUserId) {
         if (userId == targetUserId) {
-            //@TODO поправить нужной ошибкой
-            System.out.println("Нельзя подписаться на себя");
+            return; // на себя подписаться нельзя (в БД это ещё и CHECK)
         }
         if (subscriptionDao.exists(userId, targetUserId)) {
             return; // уже подписан — тихо выходим, дубля не создаём

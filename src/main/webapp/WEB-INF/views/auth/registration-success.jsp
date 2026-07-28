@@ -1,29 +1,37 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<c:set var="ctx" value="${pageContext.request.contextPath}"/>
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <title>Registration success</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Почти готово — Qwerty!</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="${ctx}/resources/css/style.css">
 </head>
-<body style="background-color: #e8eaed;">
-<h3>Регистрация почти завершена!</h3>
-<!-- Поставить ссылку правильно -->
-<p>Чтобы активировать аккаунт, перейдите по ссылке:
-    <a id="activationLink" href="${pageContext.request.contextPath}/registration/confirm?token=${tokenUuid}">
-        http://localhost:8080/registration/confirm?token=${tokenUuid}</a></p>
-<button style="background-color: #2b85ff;
-            color: #ffffff;
-            font-size: 15px;
-            border: none;
-            border-radius: 6px;
-            padding: 12px 24px;
-            cursor: pointer;
-            width: max-content;
-            margin-top: 10px;
-            transition: background-color 0.2s;" onclick="copyText()">Скопировать</button>
+<body class="bg-body-tertiary">
+<div class="container" style="max-width:560px;">
+    <div class="card shadow-sm mt-5">
+        <div class="card-body p-4">
+            <h5 class="mb-2">Регистрация почти завершена!</h5>
+            <div class="alert alert-success py-2">Аккаунт создан. Подтвердите его по ссылке ниже.</div>
+            <p class="text-secondary small">Писем мы не отправляем — скопируйте ссылку и откройте её:</p>
+            <div class="bg-light border rounded p-2 mb-3 small" style="word-break:break-all;"
+                 id="activationLink">${ctx}/registration/confirm?token=${tokenUuid}</div>
+            <div class="d-flex gap-2">
+                <a class="btn text-white" style="background-color:#5C7CFA;"
+                   href="${ctx}/registration/confirm?token=${tokenUuid}">Подтвердить сейчас</a>
+                <button class="btn btn-outline-secondary" onclick="copyText()">Скопировать</button>
+                <a class="btn btn-light ms-auto" href="${ctx}/login">К входу</a>
+            </div>
+        </div>
+    </div>
+</div>
 <script>
     function copyText() {
-        const link = document.getElementById("activationLink").href;
-        navigator.clipboard.writeText(link);
+        navigator.clipboard.writeText(document.getElementById("activationLink").innerText);
     }
 </script>
 </body>

@@ -10,11 +10,14 @@ package by.tms.socialnetworkc41onl.service;
 import by.tms.socialnetworkc41onl.dao.PostDao;
 import by.tms.socialnetworkc41onl.dao.SubscriptionDao;
 import by.tms.socialnetworkc41onl.dao.UserDao;
+import by.tms.socialnetworkc41onl.dao.UserPhotoDao;
 import by.tms.socialnetworkc41onl.dto.ProfileDto;
+import by.tms.socialnetworkc41onl.model.Post;
 import by.tms.socialnetworkc41onl.model.User;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -36,6 +39,7 @@ public class ProfileService {
         if (user.isPresent()) {
             ProfileDto userData = new ProfileDto();
             /*Заполнить поля DTO*/
+            userData.setUserId(userId);
             userData.setUserName(user.get().getUserName());
             userData.setFirstName(user.get().getFirstName());
             userData.setLastName(user.get().getLastName());
@@ -43,20 +47,29 @@ public class ProfileService {
             userData.setGender(user.get().getGender());
             userData.setAbout(user.get().getAbout());
 
-            /*Получить фото пользователя*/
-            /*ДОПИСАТЬ*/
+            /*Аватар: текущий file_id, если есть*/
+            Long avatarId = new UserPhotoDao().getCurrentPhotoFileIdOrNull(userId);
+            if (avatarId != null) {
+                userData.setAvatarFileId(avatarId);
+            }
 
-            /*Получить количество постов текущего пользователя*/
+            /*Кто смотрит профиль (для флагов в постах и признака подписки)*/
+            Long me = SessionService.getUser(req.getSession());
+            long viewerId = (me != null) ? me : userId;
+
+            /*Посты пользователя + их количество (тем же ассемблером, что и лента)*/
             PostDao postDao = new PostDao();
-            userData.setPostsCounter(postDao.findByAuthor(userId).size());
+            List<Post> authorPosts = postDao.findByAuthor(userId);
+            userData.setPostsCounter(authorPosts.size());
+            userData.setPosts(new PostDTOAssembler().assemble(authorPosts, viewerId));
 
-            /*Получить количество подписок*/
             SubscriptionDao subscriptionDao = new SubscriptionDao();
-            userData.setSubscriptionsCounter(subscriptionDao.findSubscriptionUserIds(userId).size());
-            /*Получить количество подписчиков*/
-            userData.setFollowersCounter(subscriptionDao.findSubscriptionUserIds(userId).size());
-            /*Определить, подписан ли пользователь сессии на текущего пользователя*/
-            userData.setSubscribed(subscriptionDao.exists(userId, SessionService.getUser(req.getSession())));
+            /*Following — на скольких подписан пользователь*/
+            userData.setSubscriptionsCounter((int) subscriptionDao.countFollowing(userId));
+            /*Followers — сколько подписано на пользователя*/
+            userData.setFollowersCounter((int) subscriptionDao.countFollowers(userId));
+            /*Подписан ли текущий пользователь сессии на этого (me -> profile)*/
+            userData.setSubscribed(me != null && subscriptionDao.exists(me, userId));
 
             return userData;
         }

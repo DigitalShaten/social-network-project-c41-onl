@@ -4,6 +4,7 @@ import by.tms.socialnetworkc41onl.dao.TokenDao;
 import by.tms.socialnetworkc41onl.dao.UserDao;
 import by.tms.socialnetworkc41onl.model.Token;
 import by.tms.socialnetworkc41onl.model.User;
+import by.tms.socialnetworkc41onl.util.PasswordUtil;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -92,7 +93,7 @@ public class RecoveryService {
         User user = userOptional.get();
 
         // Обновляем хэш пароля
-        user.setPasswordHash(newPassword);
+        user.setPasswordHash(PasswordUtil.hash(newPassword));
 
         userDao.update(user);
         tokenDao.deactivate(tokenId);

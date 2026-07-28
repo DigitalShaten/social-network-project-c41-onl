@@ -4,11 +4,11 @@ import by.tms.socialnetworkc41onl.constant.Gender;
 import by.tms.socialnetworkc41onl.dao.FileDao;
 import by.tms.socialnetworkc41onl.dao.UserDao;
 import by.tms.socialnetworkc41onl.dao.UserPhotoDao;
+import by.tms.socialnetworkc41onl.dto.PostDTO;
+import by.tms.socialnetworkc41onl.dto.ProfileDto;
 import by.tms.socialnetworkc41onl.model.File;
 import by.tms.socialnetworkc41onl.model.FileData;
 import by.tms.socialnetworkc41onl.model.User;
-import by.tms.socialnetworkc41onl.model.dto.EditProfileDto;
-import by.tms.socialnetworkc41onl.model.dto.UserProfileDto;
 
 /**
  * @author Ирина Мизгир
@@ -22,7 +22,7 @@ public class ProfileUserService {
 
     private final UserPhotoDao userPhotoDao = new UserPhotoDao();
 
-    public void editProfile(EditProfileDto editProfileDto) {
+    public void editProfile(PostDTO.EditProfileDto editProfileDto) {
         User user = userDao.findById(editProfileDto.userId()).orElseThrow(() -> new RuntimeException("User not found"));
         user.setFirstName(editProfileDto.firstName());
         user.setLastName(editProfileDto.lastName());
@@ -40,11 +40,11 @@ public class ProfileUserService {
         }
     }
 
-    public UserProfileDto getUserProfileDtoByUserId(long userId) {
+    public ProfileDto.UserProfileDto getUserProfileDtoByUserId(long userId) {
         User user = userDao.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
         Long currentFileId = userPhotoDao.getCurrentPhotoFileIdOrNull(userId);
 
-        return new UserProfileDto(
+        return new ProfileDto.UserProfileDto(
                 userId,
                 user.getFirstName(),
                 user.getLastName(),
